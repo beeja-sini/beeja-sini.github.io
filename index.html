@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="night">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>The Lost Temple of Beejasini | Software Developer Portfolio</title>
+  <meta name="description" content="Beejasini Futtinga, software developer in Mauritius specialising in PHP, API integration, SQL Server and MySQL. Play through the Lost Temple or view the classic portfolio.">
+  <meta property="og:title" content="The Lost Temple of Beejasini">
+  <meta property="og:description" content="A playable portfolio of Beejasini Futtinga, software developer (PHP, APIs, SQL Server & MySQL).">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗿</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Karla:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" id="brandLink" aria-label="Back to the temple gate">
+      <span class="brand-mark" aria-hidden="true">BF</span>
+      <span class="brand-name" id="brandName">Beejasini Futtinga</span>
+    </a>
+    <div class="topbar-actions">
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="Switch to day mode" title="Day / night"><span aria-hidden="true">🌙</span></button>
+      <button class="icon-btn" id="soundBtn" type="button" aria-label="Mute sound" title="Sound on / off"><span aria-hidden="true">🔊</span></button>
+      <button class="btn btn-small btn-outline" id="viewBtn" type="button">Skip the adventure</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- ================= ADVENTURE ================= -->
+    <section class="view" id="adventure" aria-label="The Lost Temple game">
+      <div class="game-wrap" id="gameWrap">
+        <canvas id="game" aria-label="Runner game. Press space or tap to jump." role="img"></canvas>
+
+        <div class="hud" id="hud" hidden>
+          <div class="hud-score">
+            <span class="hud-label">Score</span> <b id="scoreVal">0</b>
+            <span class="hud-best">Best <b id="bestVal">0</b></span>
+          </div>
+          <nav class="journal" id="journal" aria-label="Relic journal"></nav>
+        </div>
+
+        <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+        <div class="gate" id="gate">
+          <div class="gate-arch">
+            <span class="torch left" aria-hidden="true"><span class="flame"></span></span>
+            <span class="torch right" aria-hidden="true"><span class="flame"></span></span>
+            <p class="gate-kicker">The Lost Temple of</p>
+            <h1 class="gate-name" id="gateName">Beejasini</h1>
+            <p class="gate-sub" id="gateSub">Software Developer</p>
+            <div class="gate-actions">
+              <button class="btn btn-gold" id="startBtn" type="button">Start running</button>
+              <button class="btn btn-ghost" id="skipBtn" type="button">Skip the adventure</button>
+            </div>
+            <p class="gate-meta">Space, ↑ or tap to jump. Collect relics to uncover my story.<span class="gate-best" id="gateBest"></span></p>
+          </div>
+        </div>
+
+        <div class="modal" id="modal" hidden>
+          <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle" tabindex="-1" id="modalCard">
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-foot" id="modalFoot"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= CLASSIC ================= -->
+    <section class="view" id="classic" aria-label="Classic portfolio" hidden></section>
+  </main>
+
+  <!-- ================= CHATBOT ================= -->
+  <button class="chat-fab" id="chatFab" type="button" aria-controls="chatPanel" aria-expanded="false">
+    <span class="chat-fab-icon" aria-hidden="true">🧭</span><span class="chat-fab-label">Ask the Temple Guide</span>
+  </button>
+  <section class="chat-panel" id="chatPanel" aria-label="Temple Guide chat" hidden>
+    <header class="chat-head">
+      <span class="chat-avatar" aria-hidden="true">🧭</span>
+      <div>
+        <p class="chat-title">Temple Guide</p>
+        <p class="chat-subtitle">Ask me anything about Beejasini</p>
+      </div>
+      <button class="icon-btn chat-close" id="chatClose" type="button" aria-label="Close chat">✕</button>
+    </header>
+    <div class="chat-log" id="chatLog" aria-live="polite"></div>
+    <div class="chat-chips" id="chatChips"></div>
+    <form class="chat-form" id="chatForm" autocomplete="off">
+      <label class="sr-only" for="chatInput">Your question</label>
+      <input id="chatInput" type="text" placeholder="e.g. Which projects use PHP?" maxlength="200">
+      <button class="btn btn-gold btn-small" type="submit">Send</button>
+    </form>
+  </section>
+
+  <noscript><p class="noscript">This portfolio needs JavaScript. Email beejafuttinga@gmail.com for my CV.</p></noscript>
+
+  <script src="data.js"></script>
+  <script src="game.js"></script>
+  <script src="chatbot.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
