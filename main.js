@@ -278,12 +278,12 @@
     body.scrollTop = 0;
     game.pause();
     lastFocus = document.activeElement;
-    $('modal').hidden = false; modalOpen = true;
+    $('modal').hidden = false; modalOpen = true; document.body.classList.add('modal-open');
     setTimeout(() => (foot.querySelector('button') || $('modalCard')).focus(), 30);
   }
   function closeModal() {
     if (!modalOpen) return;
-    $('modal').hidden = true; modalOpen = false;
+    $('modal').hidden = true; modalOpen = false; document.body.classList.remove('modal-open');
     if (!chat.isOpen()) game.resume();
     canvas.focus && lastFocus && lastFocus.focus && lastFocus.focus();
   }
@@ -317,7 +317,7 @@
   function showView(v) {
     const classic = v === 'classic';
     if (classic && game.running) game.pause();
-    if (modalOpen) { $('modal').hidden = true; modalOpen = false; }
+    if (modalOpen) { $('modal').hidden = true; modalOpen = false; document.body.classList.remove('modal-open'); }
     $('classic').hidden = !classic; $('adventure').hidden = classic;
     document.body.classList.toggle('is-classic', classic);
     $('viewBtn').textContent = classic ? 'Back to the temple' : 'Skip the adventure';
@@ -375,6 +375,17 @@
     onOpen: () => { track('open-chat'); if (game.running && !game.paused) { game.pause(); pausedByChat = true; } },
     onClose: () => { if (pausedByChat && !modalOpen) game.resume(); pausedByChat = false; }
   });
+
+  /* ---------- real visible height (phones' address bars change it) ---------- */
+  function setAppHeight() {
+    const h = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
+    document.documentElement.style.setProperty('--app-h', Math.round(h) + 'px');
+    if (!$('adventure').hidden) game.resize();
+  }
+  setAppHeight();
+  window.addEventListener('resize', setAppHeight);
+  window.addEventListener('orientationchange', () => setTimeout(setAppHeight, 250));
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', setAppHeight);
 
   /* ---------- boot ---------- */
   renderClassic(); applyTheme(); applySound(); updateBest(); updateJournal();

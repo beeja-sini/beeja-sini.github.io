@@ -12,7 +12,7 @@ window.PORTFOLIO = {
   yearsExperience: "3+",
   email: "beejafuttinga@gmail.com",
   linkedin: "https://www.linkedin.com/in/beejasini-futtinga-1a78b0279",
-  github: "", // add your profile, e.g. "https://github.com/your-username"
+  github: "https://github.com/beejasini", // add your profile, e.g. "https://github.com/your-username"
   resume: "assets/Beejasini-Futtinga-CV.pdf", // put your CV PDF at this path (version WITHOUT your phone number)
   lookingFor: "Open to software developer, software engineering and backend developer roles.",
   spokenLanguages: ["English", "French", "Mauritian Creole", "Hindi"],

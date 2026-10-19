@@ -76,8 +76,13 @@
       const dpr = Math.min(global.devicePixelRatio || 1, 2);
       this.c.width = Math.max(1, Math.round(r.width * dpr));
       this.c.height = Math.max(1, Math.round(r.height * dpr));
-      this.scale = this.c.height / H;
+      // Fit the 400-unit-tall world to the height, but never show less than
+      // ~430 units of width (tall phones): extra height becomes sky and stone.
+      this.scale = Math.min(this.c.height / H, this.c.width / 430);
       this.W = this.c.width / this.scale;
+      this.Hv = this.c.height / this.scale;
+      this.offY = Math.max(0, (this.Hv - H) * 0.72);
+      this.bottom = this.Hv - this.offY;
       this.playerX = clamp(this.W * 0.2, 80, 170);
       this.speedScale = clamp(this.W / 760, 0.7, 1);
     }
@@ -172,7 +177,7 @@
           else { p.y = GROUND; p.vy = 0; if (!p.grounded) this.dust(wx); p.grounded = true; p.coyote = 6; }
         } else { if (p.grounded) p.coyote = 6; p.grounded = false; p.coyote -= dt; }
       }
-      if (p.falling && p.y > H + 80) this.respawn(gap || this.obstacles.find(o => o.type === 'gap' && wx >= o.x && wx <= o.x + o.w + 20));
+      if (p.falling && p.y > this.bottom + 60) this.respawn(gap || this.obstacles.find(o => o.type === 'gap' && wx >= o.x && wx <= o.x + o.w + 20));
 
       if (p.grounded && !p.falling) p.anim += this.speed * this.speedScale * 0.13 * dt * (p.stumble > 0 ? 0.6 : 1);
 
@@ -282,7 +287,7 @@
     /* =================== drawing =================== */
     draw() {
       const ctx = this.ctx, P = PALETTES[this.theme];
-      ctx.setTransform(this.scale, 0, 0, this.scale, 0, 0);
+      ctx.setTransform(this.scale, 0, 0, this.scale, 0, Math.round(this.offY * this.scale));
       const cam = (this.running || this.ended) ? this.dist : this.idle;
       const live = this.running || this.ended;
 
@@ -301,7 +306,7 @@
       if (this.theme === 'night') {
         const g = ctx.createRadialGradient(this.playerX, GROUND - 40, 60, this.playerX + 100, GROUND - 40, this.W * 0.9);
         g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,10,.55)');
-        ctx.fillStyle = g; ctx.fillRect(0, 0, this.W, H);
+        ctx.fillStyle = g; ctx.fillRect(0, -this.offY, this.W, this.Hv);
       }
     }
 
@@ -309,21 +314,21 @@
       const ctx = this.ctx;
       const g = ctx.createLinearGradient(0, 0, 0, GROUND);
       g.addColorStop(0, P.skyTop); g.addColorStop(1, P.skyBot);
-      ctx.fillStyle = g; ctx.fillRect(0, 0, this.W, H);
+      ctx.fillStyle = g; ctx.fillRect(0, -this.offY, this.W, this.Hv);
       if (this.theme === 'night') {
         for (const s of this.stars) {
           ctx.globalAlpha = 0.45 + 0.55 * Math.abs(Math.sin(this.t * 0.03 + s.p));
           ctx.fillStyle = '#fff6dd';
-          ctx.beginPath(); ctx.arc(s.x * this.W, s.y * H, s.r, 0, 7); ctx.fill();
+          ctx.beginPath(); ctx.arc(s.x * this.W, -this.offY + s.y * (H + this.offY), s.r, 0, 7); ctx.fill();
         }
         ctx.globalAlpha = 1;
-        this.glow(this.W * 0.8, 70, 70, 'rgba(220,225,255,.25)');
-        ctx.fillStyle = '#ece6d2'; ctx.beginPath(); ctx.arc(this.W * 0.8, 70, 22, 0, 7); ctx.fill();
+        this.glow(this.W * 0.64, 70, 70, 'rgba(220,225,255,.25)');
+        ctx.fillStyle = '#ece6d2'; ctx.beginPath(); ctx.arc(this.W * 0.64, 70, 22, 0, 7); ctx.fill();
         ctx.fillStyle = 'rgba(160,150,130,.35)';
-        ctx.beginPath(); ctx.arc(this.W * 0.8 - 7, 65, 5, 0, 7); ctx.arc(this.W * 0.8 + 6, 78, 3.5, 0, 7); ctx.fill();
+        ctx.beginPath(); ctx.arc(this.W * 0.64 - 7, 65, 5, 0, 7); ctx.arc(this.W * 0.64 + 6, 78, 3.5, 0, 7); ctx.fill();
       } else {
-        this.glow(this.W * 0.78, 82, 110, 'rgba(255,240,190,.7)');
-        ctx.fillStyle = '#fff4cf'; ctx.beginPath(); ctx.arc(this.W * 0.78, 82, 30, 0, 7); ctx.fill();
+        this.glow(this.W * 0.64, 82, 110, 'rgba(255,240,190,.7)');
+        ctx.fillStyle = '#fff4cf'; ctx.beginPath(); ctx.arc(this.W * 0.64, 82, 30, 0, 7); ctx.fill();
       }
     }
 
@@ -336,12 +341,12 @@
     drawFar(P, cam) {
       const ctx = this.ctx;
       const layer = (off, base, amp, color, f1, f2) => {
-        ctx.fillStyle = color; ctx.beginPath(); ctx.moveTo(0, H);
+        ctx.fillStyle = color; ctx.beginPath(); ctx.moveTo(0, this.bottom);
         for (let x = 0; x <= this.W + 20; x += 16) {
           const wx = x + off;
           ctx.lineTo(x, base + Math.sin(wx * f1) * amp + Math.sin(wx * f2 + 1.3) * amp * 0.5);
         }
-        ctx.lineTo(this.W, H); ctx.closePath(); ctx.fill();
+        ctx.lineTo(this.W, this.bottom); ctx.closePath(); ctx.fill();
       };
       layer(cam * 0.06, 205, 20, P.far, 0.004, 0.013);
       layer(cam * 0.12, 238, 14, P.far2, 0.006, 0.019);
@@ -394,12 +399,16 @@
 
     drawGround(P, cam, live) {
       const ctx = this.ctx;
-      ctx.fillStyle = P.ground; ctx.fillRect(0, GROUND, this.W, H - GROUND);
+      const B = this.bottom;
+      ctx.fillStyle = P.ground; ctx.fillRect(0, GROUND, this.W, B - GROUND);
       ctx.fillStyle = P.groundTop; ctx.fillRect(0, GROUND, this.W, 7);
       ctx.fillStyle = P.line;
       ctx.fillRect(0, GROUND + 7, this.W, 2);
       [GROUND + 36, GROUND + 66].forEach(y => ctx.fillRect(0, y, this.W, 2));
       const rows = [[GROUND + 9, 27, 0], [GROUND + 38, 28, 32], [GROUND + 68, 40, 0]];
+      for (let y = GROUND + 98, i = 0; y < B; y += 30, i++) {
+        ctx.fillRect(0, y - 2, this.W, 2); rows.push([y, 28, i % 2 ? 0 : 32]);
+      }
       for (const [y, h, shift] of rows) {
         const step = 64, start = -((cam + shift) % step);
         for (let x = start; x < this.W; x += step) ctx.fillRect(x, y, 2, h);
@@ -415,11 +424,11 @@
         const sx = o.x - cam;
         if (sx > this.W + 20 || sx + o.w < -20) continue;
         if (o.type === 'gap') {
-          const g = ctx.createLinearGradient(0, GROUND, 0, H);
+          const g = ctx.createLinearGradient(0, GROUND, 0, B);
           g.addColorStop(0, '#000'); g.addColorStop(1, P.abyss);
-          ctx.fillStyle = g; ctx.fillRect(sx, GROUND - 1, o.w, H - GROUND + 2);
+          ctx.fillStyle = g; ctx.fillRect(sx, GROUND - 1, o.w, B - GROUND + 2);
           ctx.fillStyle = 'rgba(0,0,0,.45)';
-          ctx.fillRect(sx, GROUND, 5, H - GROUND); ctx.fillRect(sx + o.w - 5, GROUND, 5, H - GROUND);
+          ctx.fillRect(sx, GROUND, 5, B - GROUND); ctx.fillRect(sx + o.w - 5, GROUND, 5, B - GROUND);
           // hanging roots inside the chasm
           ctx.strokeStyle = P.root; ctx.lineWidth = 2;
           ctx.beginPath();
@@ -472,7 +481,7 @@
         // light beam
         const beam = ctx.createLinearGradient(0, 0, 0, GROUND);
         beam.addColorStop(0, 'rgba(255,220,140,0)'); beam.addColorStop(1, `rgba(255,220,140,${0.18 * P.glow + 0.06})`);
-        ctx.fillStyle = beam; ctx.fillRect(x - 18, 0, 36, GROUND);
+        ctx.fillStyle = beam; ctx.fillRect(x - 18, -this.offY, 36, GROUND + this.offY);
         this.glow(x, y, 46, gemCol ? gemCol + '88' : 'rgba(255,210,120,.6)');
         if (m.type === 'tablet') {
           ctx.fillStyle = '#8f877a'; this.rrect(x - 17, y - 23, 34, 46, 8); ctx.fill();
@@ -589,6 +598,7 @@
 
     drawVines(P, cam) {
       const ctx = this.ctx, off = cam * 0.95, span = 260;
+      ctx.save(); ctx.translate(0, -this.offY);
       ctx.strokeStyle = P.vine; ctx.lineWidth = 3;
       for (let k = Math.floor(off / span) - 1; k <= Math.floor((off + this.W) / span) + 1; k++) {
         const x = k * span + hash(k + 70) * 160 - off, len = 30 + hash(k + 21) * 90;
@@ -600,6 +610,7 @@
           ctx.beginPath(); ctx.ellipse(lx + ((j / 16) % 2 ? 5 : -5), j, 6, 3, (j / 16) % 2 ? 0.6 : -0.6, 0, 7); ctx.fill();
         }
       }
+      ctx.restore();
     }
 
     rrect(x, y, w, h, r) {
