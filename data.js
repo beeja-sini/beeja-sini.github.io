@@ -20,7 +20,7 @@ window.PORTFOLIO = {
 
   /* Visitor stats with GoatCounter (free). Paste your code's URL here, e.g.
      "https://beejasini.goatcounter.com/count". Leave empty to turn analytics off. */
-  analytics: { goatcounter: "" },
+  analytics: { goatcounter: "https://Beejasini.goatcounter.com/count" },
 
   summary: [
     "I'm a software developer with 3+ years of professional experience building and supporting enterprise and business-critical applications.",
